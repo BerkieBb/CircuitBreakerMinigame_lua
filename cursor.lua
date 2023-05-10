@@ -43,10 +43,12 @@ function cursor:updateAlpha()
 end
 
 function cursor:StartCursorDeathAnimation()
-    while self.private.alpha > 0 do
-        self:updateAlpha()
-        Wait(0)
-    end
+    CreateThread(function()
+        while self.private.alpha > 0 do
+            self:updateAlpha()
+            Wait(20)
+        end
+    end)
 end
 
 function cursor:GetCursorInputFromPlayer()
@@ -159,15 +161,15 @@ function cursor:DrawTailHistory()
 
         if math.abs(xDelta) > math.abs(yDelta) then
             if HasCircuitFailed then
-                DrawSprite('MPCircuitHack', 'tail', centerPoint.x, centerPoint.y, distance + 0.0018, 0.003, 0, 188, 49, 43, self.private.alpha)
+                DrawSprite('MPCircuitHack', 'Tail', centerPoint.x, centerPoint.y, distance + 0.0018, 0.003, 0, 188, 49, 43, self.private.alpha)
             else
-                DrawSprite('MPCircuitHack', 'tail', centerPoint.x, centerPoint.y, distance + 0.0018, 0.003, 0, 45, 203, 134, self.private.alpha)
+                DrawSprite('MPCircuitHack', 'Tail', centerPoint.x, centerPoint.y, distance + 0.0018, 0.003, 0, 45, 203, 134, self.private.alpha)
             end
         else
             if HasCircuitFailed then
-                DrawSprite('MPCircuitHack', 'tail', centerPoint.x, centerPoint.y, 0.0018, distance + 0.001, 0, 188, 49, 43, self.private.alpha)
+                DrawSprite('MPCircuitHack', 'Tail', centerPoint.x, centerPoint.y, 0.0018, distance + 0.001, 0, 188, 49, 43, self.private.alpha)
             else
-                DrawSprite('MPCircuitHack', 'tail', centerPoint.x, centerPoint.y, 0.0018, distance + 0.001, 0, 45, 203, 134, self.private.alpha)
+                DrawSprite('MPCircuitHack', 'Tail', centerPoint.x, centerPoint.y, 0.0018, distance + 0.001, 0, 45, 203, 134, self.private.alpha)
             end
         end
     end
@@ -175,13 +177,13 @@ end
 
 function cursor:DrawCursor()
     if not self.isAlive then
-        DrawSprite('MPCircuitHack', 'spark', self.position.x, self.position.y, 0.0125, 0.0125, 0, 255, 255, 255, self.private.alpha)
+        DrawSprite('MPCircuitHack', 'Spark', self.position.x, self.position.y, 0.0125, 0.0125, 0, 255, 255, 255, self.private.alpha)
     end
 
     if HasCircuitFailed then
-        DrawSprite('MPCircuitHack', 'head', self.position.x, self.position.y, self.cursorHeadSize, self.cursorHeadSize, 0, 188, 49, 43, self.private.alpha)
+        DrawSprite('MPCircuitHack', 'Head', self.position.x, self.position.y, self.cursorHeadSize, self.cursorHeadSize, 0, 188, 49, 43, self.private.alpha)
     else
-        DrawSprite('MPCircuitHack', 'head', self.position.x, self.position.y, self.cursorHeadSize, self.cursorHeadSize, 0, 45, 203, 134, self.private.alpha)
+        DrawSprite('MPCircuitHack', 'Head', self.position.x, self.position.y, self.cursorHeadSize, self.cursorHeadSize, 0, 45, 203, 134, self.private.alpha)
     end
 end
 

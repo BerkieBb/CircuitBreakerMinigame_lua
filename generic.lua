@@ -272,7 +272,7 @@ local function drawPortSprite(position, heading)
     local headingSet = heading == 0 or heading == 180
     local portWidth = headingSet and 0.02 or 0.0325
     local portHeight = headingSet and 0.055 or 0.03
-    DrawSprite('MPCircuitHack', 'genericport', position.x, position.y, portWidth, portHeight, heading, 255, 255, 255, 255)
+    DrawSprite('MPCircuitHack', 'GenericPort', position.x, position.y, portWidth, portHeight, heading, 255, 255, 255, 255)
 end
 
 ---Determines whether the specified cursor is in the game winning position.

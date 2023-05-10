@@ -147,7 +147,7 @@ end
 function DebugPortSprite(position, heading)
     local width = (heading == 0 or heading == 180) and 0.02 or 0.0325
     local height = (heading == 0 or heading == 180) and 0.055 or 0.03
-    DrawDebugSprite('genericport', position, heading, width, height)
+    DrawDebugSprite('GenericPort', position, heading, width, height)
 end
 
 function GetPortDebugHeading(currentHeading)

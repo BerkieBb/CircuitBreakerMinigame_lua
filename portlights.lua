@@ -22,7 +22,7 @@ end
 ---@param alpha? integer
 function portLights:DrawLightSprite(position, red, green, blue, alpha)
     alpha = alpha or 255
-    DrawSprite('MPCircuitHack', 'light', position.x, position.y, 0.00775, 0.00775, 0, red, green, blue, alpha)
+    DrawSprite('MPCircuitHack', 'Light', position.x, position.y, 0.00775, 0.00775, 0, red, green, blue, alpha)
 end
 
 function portLights:DrawLights()

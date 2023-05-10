@@ -26,6 +26,7 @@ local isDisconnectedScreenActive
 local lastDisconnectCheckTime
 local reconnectingTime
 local backgroundSoundId
+local trailSoundId
 local startingHealth
 local debugPortHeading = 0
 
@@ -33,7 +34,7 @@ local debugPortHeading = 0
 
 --#region Changeable Variables
 
-local defaultDelayStartTimeMs <const> = 1000
+local defaultDelayStartTimeMs <const> = 300
 local minDelayEndGameTimeMs <const> = 5000
 local maxDelayEndGameTimeMs <const> = 5000
 local defaultMinReconnectTimeMs <const> = 3000
@@ -111,10 +112,16 @@ local function disposeTextureDictionaries()
 end
 
 local function disposeSounds()
+    StopSound(trailSoundId)
     StopSound(backgroundSoundId)
 
-    if backgroundSoundId <= 0 then return end
-    ReleaseSoundId(backgroundSoundId)
+    if backgroundSoundId > 0 then
+        ReleaseSoundId(backgroundSoundId)
+    end
+
+    if trailSoundId > 0 then
+        ReleaseSoundId(trailSoundId)
+    end
 end
 
 local function dispose()
@@ -169,6 +176,8 @@ local function initializeResources()
         RequestStreamedTextureDict(textureDictionaries[i], false)
     end
 
+    RequestScriptAudioBank('DLC_MPHEIST/HEIST_HACK_SNAKE', false)
+
     local timeout = GetGameTimer() + 5000
     while GetGameTimer() - timeout < 0 do
         local allLoaded = true
@@ -193,6 +202,7 @@ local function initializeResources()
 
     setScaleform()
     backgroundSoundId = GetSoundId()
+    trailSoundId = GetSoundId()
 end
 
 local function disableControls()
@@ -229,6 +239,7 @@ end
 local function playStartSound(delayMs)
     Wait(delayMs)
     PlaySoundFrontend(-1, 'Start', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+    PlaySoundFrontend(trailSoundId, 'Trail_Custom', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
 end
 
 local function drawCursorAndPortSprites()
@@ -241,7 +252,7 @@ end
 ---@param currentMap integer
 local function drawMapSprite(currentMap)
     local levelTextureDict = currentMap > 3 and 'MPCircuitHack3' or 'MPCircuitHack2'
-    DrawSprite(levelTextureDict, ('cblevel%s'):format(_currentLevelNumber), 0.5, 0.5, 1, 1, 0, 255, 255, 255, 255)
+    DrawSprite(levelTextureDict, ('CBLevel%s'):format(_currentLevelNumber), 0.5, 0.5, 1, 1, 0, 255, 255, 255, 255)
 end
 
 ---@param currentDifficulty Difficulty
@@ -373,11 +384,13 @@ end
 
 local function showFailureScreenAndPlaySound()
     PlaySoundFrontend(-1, 'Crash', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+    StopSound(trailSoundId)
     showDisplayScaleform('CIRCUIT FAILED', 'Security Tunnel Detected', 188, 49, 43, false)
 end
 
 local function showSuccessScreenAndPlaySound()
     PlaySoundFrontend(-1, 'Goal', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+    StopSound(trailSoundId)
     showDisplayScaleform('CIRCUIT COMPLETE', 'Decryption Execution x86 Tunneling', 45, 203, 134, true)
 end
 
