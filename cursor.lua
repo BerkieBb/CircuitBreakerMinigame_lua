@@ -100,11 +100,11 @@ function cursor:CheckTailCollision()
         end
 
         if math.abs(xDelta) > math.abs(yDelta) then
-            if math.round(self.position.x, 4) < math.round(centerPoint.x - distance / 2, 4) and math.round(self.position.x, 4) < math.round(centerPoint.x + distance / 2, 4) and math.abs(self.position.y - centerPoint.y) <= 0.006 then
+            if math.round(self.position.x, 4) > math.round(centerPoint.x - distance / 2, 4) and math.round(self.position.x, 4) < math.round(centerPoint.x + distance / 2, 4) and math.abs(self.position.y - centerPoint.y) <= 0.006 then
                 return true
             end
         else
-            if math.round(self.position.y, 4) < math.round(centerPoint.y - distance / 2, 4) and math.round(self.position.y, 4) < math.round(centerPoint.y + distance / 2, 4) and math.abs(self.position.x - centerPoint.x) <= 0.006 then
+            if math.round(self.position.y, 4) > math.round(centerPoint.y - distance / 2, 4) and math.round(self.position.y, 4) < math.round(centerPoint.y + distance / 2, 4) and math.abs(self.position.x - centerPoint.x) <= 0.006 then
                 return true
             end
         end

@@ -66,11 +66,10 @@ end
 ---@param cursorHeadSize number
 ---@return vector2[]
 local function getCursorMaxPoints(cursorCoords, cursorHeadSize)
-    cursorHeadSize /= 2
-    local headPoint1 = vec2(cursorCoords.x - cursorHeadSize, cursorCoords.y)
-    local headPoint2 = vec2(cursorCoords.x - cursorHeadSize, cursorCoords.y)
-    local headPoint3 = vec2(cursorCoords.x, cursorCoords.y - cursorHeadSize)
-    local headPoint4 = vec2(cursorCoords.x, cursorCoords.y + cursorHeadSize)
+    local headPoint1 = vec2(cursorCoords.x - cursorHeadSize / 2, cursorCoords.y)
+    local headPoint2 = vec2(cursorCoords.x - cursorHeadSize / 2, cursorCoords.y)
+    local headPoint3 = vec2(cursorCoords.x, cursorCoords.y - cursorHeadSize / 2)
+    local headPoint4 = vec2(cursorCoords.x, cursorCoords.y + cursorHeadSize / 2)
 
     return {headPoint1, headPoint2, headPoint3, headPoint4, cursorCoords}
 end
@@ -229,6 +228,8 @@ local function disableControls()
 	DisableControlAction(0, 92, true) -- INPUT_VEH_PASSENGER_ATTACK
 	DisableControlAction(0, 99, true) -- INPUT_VEH_SELECT_NEXT_WEAPON
 	DisableControlAction(0, 115, true) -- INPUT_VEH_FLY_SELECT_NEXT_WEAPON
+    DisableControlAction(0, 44, true) -- INPUT_COVER
+    DisableControlAction(0, 38, true) -- INPUT_PICKUP
 
     HudWeaponWheelIgnoreSelection()
     HideHudComponentThisFrame(19) -- WEAPON_WHEEL
@@ -471,7 +472,7 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
     while true do
         if isPlayerTakingDamage() then return GameStatus.TakingDamage end
 
-        if IsControlPressed(0, 44) and not HasCircuitFailed then -- INPUT_COVER
+        if IsDisabledControlPressed(0, 44) and not HasCircuitFailed then -- INPUT_COVER
             endGame()
             return GameStatus.PlayerQuit
         end
@@ -489,11 +490,9 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
             debugPortHeading = GetPortDebugHeading(debugPortHeading)
             DebugPortSprite(_cursor.position, debugPortHeading)
 
-            if IsControlJustPressed(0, 38) then -- INPUT_PICKUP
-                print(('vec2(%s, %s),'):format(cursor.position.x, cursor.position.y))
+            if IsDisabledControlJustPressed(0, 38) then -- INPUT_PICKUP
+                print(('vec2(%s, %s),'):format(_cursor.position.x, _cursor.position.y))
             end
-
-            Wait(0)
 
             goto skipRest
         end
@@ -605,7 +604,3 @@ local function runDefaultMiniGame()
 end
 
 exports('runDefaultRandom', runDefaultMiniGame)
-
-RegisterCommand('test', function()
-    print(runDefaultMiniGameFromDifficulty(1, Difficulty.Beginner))
-end, false)
