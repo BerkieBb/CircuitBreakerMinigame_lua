@@ -9,12 +9,13 @@ local gameBounds = {
     vec2(0.841, 0.153) -- Top Right
 }
 local textureDictionaries = {'MPCircuitHack', 'MPCircuitHack2', 'MPCircuitHack3'}
-local _gameEndTime
-local _gameStartTime
-local _initCursorSpeed
+local gameEndTime
+local gameStartTime
+local delayedStartTime
+local initCursorSpeed
 local _cursorSpeed
-local _illegalAreas
-local _genericPorts
+local illegalAreas
+local genericPorts
 local _cursor
 local _scaleform
 local _currentDifficulty
@@ -34,7 +35,7 @@ local debugPortHeading = 0
 
 --#region Changeable Variables
 
-local defaultDelayStartTimeMs <const> = 300
+local defaultDelayStartTimeMs <const> = 1000
 local minDelayEndGameTimeMs <const> = 5000
 local maxDelayEndGameTimeMs <const> = 5000
 local defaultMinReconnectTimeMs <const> = 3000
@@ -237,16 +238,18 @@ end
 
 ---@param delayMs integer
 local function playStartSound(delayMs)
-    Wait(delayMs)
-    PlaySoundFrontend(-1, 'Start', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
-    PlaySoundFrontend(trailSoundId, 'Trail_Custom', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+    CreateThread(function()
+        Wait(delayMs)
+        PlaySoundFrontend(-1, 'Start', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+        PlaySoundFrontend(trailSoundId, 'Trail_Custom', 'DLC_HEIST_HACKING_SNAKE_SOUNDS', true)
+    end)
 end
 
 local function drawCursorAndPortSprites()
     _cursor:DrawCursor()
     _cursor:DrawTailHistory()
 
-    _genericPorts:DrawPorts()
+    genericPorts:DrawPorts()
 end
 
 ---@param currentMap integer
@@ -330,7 +333,7 @@ local function getCursorSpeedOnReconnect(currentDifficulty)
         speedDelta *= -1
     end
 
-    return math.clamp(_cursorSpeed + speedDelta, _initCursorSpeed, maxSpeed)
+    return math.clamp(_cursorSpeed + speedDelta, initCursorSpeed, maxSpeed)
 end
 
 local function finishReconnection()
@@ -397,7 +400,7 @@ end
 ---@param cursorSpeed number
 local function initializeCursorSpeed(cursorSpeed)
     cursorSpeed = math.clamp(cursorSpeed - applyHackingKitBonusToCursorSpeed(), 0.001, cursorSpeed)
-    _initCursorSpeed = cursorSpeed
+    initCursorSpeed = cursorSpeed
     _cursorSpeed = cursorSpeed
 end
 
@@ -412,13 +415,14 @@ local function initializeLevelVariables(levelNumber, difficultyLevel, cursorSpee
     isHackingKitDisconnected = false
     hackingKitVersionNumber = getHackingKitVersionNumber()
     _currentLevelNumber = levelNumber
-    _illegalAreas = GetBoxBounds(levelNumber)
-    _genericPorts = newGeneric(levelNumber)
-    _cursor = newCursor(_genericPorts)
+    illegalAreas = GetBoxBounds(levelNumber)
+    genericPorts = newGeneric(levelNumber)
+    _cursor = newCursor(genericPorts)
     initializeCursorSpeed(cursorSpeed)
     _currentDifficulty = difficultyLevel
-    _gameStartTime = GetGameTimer()
-    lastDisconnectCheckTime = GetGameTimer() + delayStartMs
+    gameStartTime = GetGameTimer()
+    delayedStartTime = gameStartTime + delayStartMs
+    lastDisconnectCheckTime = gameStartTime + delayStartMs
     startingHealth = GetEntityHealth(PlayerPedId())
 end
 
@@ -497,13 +501,13 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
         drawCursorAndPortSprites()
         DrawScaleformMovieFullscreen(_scaleform, 255, 255, 255, 255, 0)
 
-        if not _isEndScreenActive and _genericPorts:IsCursorInGameWinningPosition(_cursor.position) then
+        if not _isEndScreenActive and genericPorts:IsCursorInGameWinningPosition(_cursor.position) then
             hasCircuitCompleted = true
-            _gameEndTime = GetGameTimer() + minDelayEndGameTimeMs
+            gameEndTime = GetGameTimer() + minDelayEndGameTimeMs
 
             showSuccessScreenAndPlaySound()
             _isEndScreenActive = true
-        elseif not _isEndScreenActive and isCursorOutOfBounds(_illegalAreas, gameBounds) or _genericPorts:IsCollisionWithPort(_cursor.position) or _cursor:CheckTailCollision() then
+        elseif not _isEndScreenActive and isCursorOutOfBounds(illegalAreas, gameBounds) or genericPorts:IsCollisionWithPort(_cursor.position) or _cursor:CheckTailCollision() then
             HasCircuitFailed = true
             if _cursor.isAlive then
                 _cursor.isAlive = false
@@ -512,7 +516,7 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
 
             if not _isEndScreenActive and not _cursor.isVisible then
                 showFailureScreenAndPlaySound()
-                _gameEndTime = GetGameTimer() + math.random(minFailureDelayTimeMs, maxFailureDelayTimeMs)
+                gameEndTime = GetGameTimer() + math.random(minFailureDelayTimeMs, maxFailureDelayTimeMs)
                 _isEndScreenActive = true
             end
         elseif not _isEndScreenActive and isHackingKitDisconnected then
@@ -531,13 +535,13 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
             checkIfHackingDisconnected(disconnectChance, disconnectCheckRateMs)
         end
 
-        if GetGameTimer() - _gameStartTime + delayStartMs >= 0 and not _isEndScreenActive and _cursor.isAlive and not isHackingKitDisconnected then
+        if GetGameTimer() - delayedStartTime >= 0 and not _isEndScreenActive and _cursor.isAlive and not isHackingKitDisconnected then
             _cursor:GetCursorInputFromPlayer()
             _cursor:MoveCursor(_cursorSpeed)
         end
 
         if _isEndScreenActive and (HasCircuitFailed or hasCircuitCompleted) then
-            if GetGameTimer() - _gameEndTime >= 0 then
+            if GetGameTimer() - gameEndTime >= 0 then
                 StopSound(backgroundSoundId)
 
                 if hasCircuitCompleted then
@@ -601,3 +605,7 @@ local function runDefaultMiniGame()
 end
 
 exports('runDefaultRandom', runDefaultMiniGame)
+
+RegisterCommand('test', function()
+    print(runDefaultMiniGameFromDifficulty(1, Difficulty.Beginner))
+end, false)
