@@ -205,38 +205,6 @@ local function initializeResources()
     trailSoundId = GetSoundId()
 end
 
-local function disableControls()
-    DisableControlAction(0, 34, true) -- INPUT_MOVE_LEFT_ONLY
-    DisableControlAction(0, 35, true) -- INPUT_MOVE_RIGHT_ONLY
-    DisableControlAction(0, 32, true) -- INPUT_MOVE_UP_ONLY
-    DisableControlAction(0, 33, true) -- INPUT_MOVE_DOWN_ONLY
-
-    DisableControlAction(0, 24, true) -- INPUT_ATTACK
-	DisableControlAction(0, 257, true) -- INPUT_ATTACK2
-	DisableControlAction(0, 25, true) -- INPUT_AIM
-	DisableControlAction(0, 53, true) -- INPUT_WEAPON_SPECIAL
-	DisableControlAction(0, 54, true) -- INPUT_WEAPON_SPECIAL_TWO
-	DisableControlAction(0, 58, true) -- INPUT_THROW_GRENADE
-	N_0xb885852c39cc265d() -- DISABLE_PLAYER_THROW_GRENADE_WHILE_USING_GUN
-	DisableControlAction(0, 143, true) -- INPUT_MELEE_BLOCK
-	DisableControlAction(0, 47, true) -- INPUT_DETONATE
-	DisableControlAction(0, 38, true) -- INPUT_PICKUP
-	DisableControlAction(0, 69, true) -- INPUT_VEH_ATTACK
-	DisableControlAction(0, 70, true) -- INPUT_VEH_ATTACK2
-	DisableControlAction(0, 68, true) -- INPUT_VEH_AIM
-	DisableControlAction(0, 114, true) -- INPUT_VEH_FLY_ATTACK
-	DisableControlAction(0, 92, true) -- INPUT_VEH_PASSENGER_ATTACK
-	DisableControlAction(0, 99, true) -- INPUT_VEH_SELECT_NEXT_WEAPON
-	DisableControlAction(0, 115, true) -- INPUT_VEH_FLY_SELECT_NEXT_WEAPON
-    DisableControlAction(0, 44, true) -- INPUT_COVER
-    DisableControlAction(0, 38, true) -- INPUT_PICKUP
-
-    HudWeaponWheelIgnoreSelection()
-    HideHudComponentThisFrame(19) -- WEAPON_WHEEL
-    DisableControlAction(0, 37, true) -- INPUT_SELECT_WEAPON
-    DisableControlAction(0, 199, true) -- INPUT_FRONTEND_PAUSE
-end
-
 ---@param delayMs integer
 local function playStartSound(delayMs)
     CreateThread(function()
@@ -470,6 +438,8 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
 
     local debugCursorSpeed = 0.0015
     while true do
+        DisableAllControlActions(0)
+
         if isPlayerTakingDamage() then return GameStatus.TakingDamage end
 
         if IsDisabledControlPressed(0, 44) and not HasCircuitFailed then -- INPUT_COVER
@@ -478,7 +448,6 @@ local function runMinigameTask(levelNumber, difficultyLevel, cursorSpeed, delayS
         end
 
         drawMapSprite(_currentLevelNumber)
-        disableControls()
 
         if debuggingMapPosition then
             local newDirection = GetDebugCursorDirectionInput()
